@@ -6,35 +6,23 @@
     <title>Unity WebGL Player | My project</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <!-- <style>
-      /* 透明の振動ボタン */
+    <style>
+      /* 振動ボタン（テスト用に見えるようにしてあります） */
       #vibrateBtn {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 0;
-        height: 0;
-        opacity: 0;
-        pointer-events: none;
+        top: 20px;
+        left: 20px;
+        width: 120px;
+        height: 40px;
+        opacity: 1; /* 透明解除 */
+        pointer-events: auto; /* クリック可能に */
+        background-color: orange;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
       }
-    </style> -->
-    <style>
-  /* テスト用にボタンを見えるようにする */
-  #vibrateBtn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 120px;
-    height: 40px;
-    opacity: 1; /* 透明解除 */
-    pointer-events: auto; /* クリック可能に */
-    background-color: orange;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-</style>
+    </style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -45,7 +33,7 @@
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
-      <div id="unity-warning"> </div>
+      <div id="unity-warning"></div>
       <div id="unity-footer">
         <div id="unity-webgl-logo"></div>
         <div id="unity-fullscreen-button"></div>
@@ -53,9 +41,10 @@
       </div>
     </div>
 
-    <!-- 透明振動ボタン -->
+    <!-- 振動ボタン -->
     <button id="vibrateBtn"
       onclick="if(navigator.vibrate){navigator.vibrate(500);}else{console.log('Vibrate not supported');}">
+      Vibrate Test
     </button>
 
     <script>
@@ -71,12 +60,19 @@
       function checkVibrate(){
         if(vibrateFlag){
           const btn = document.getElementById("vibrateBtn");
-          btn.click();
+          if(btn) btn.click();
           vibrateFlag = false; // 一度だけ振動
         }
       }
 
       setInterval(checkVibrate, 100); // 0.1秒ごとに監視
+
+      // 手動テスト用：1秒ごとにボタンをクリック
+      const autoClickTest = () => {
+        const btn = document.getElementById("vibrateBtn");
+        if(btn) btn.click();
+      }
+      setInterval(autoClickTest, 1000); // コメント解除すると1秒ごとに振動テスト
 
       // ===== Unity WebGL 初期化コード =====
       var container = document.querySelector("#unity-container");
@@ -94,13 +90,11 @@
         div.innerHTML = msg;
         warningBanner.appendChild(div);
         if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
+        else if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(() => {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
         updateBannerVisibility();
       }
 
