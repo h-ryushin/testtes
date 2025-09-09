@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <style>
-      /* 振動ボタンを透明＆非表示にする */
+      /* 透明の振動ボタン */
       #vibrateBtn {
         position: absolute;
         top: 0;
@@ -15,7 +15,7 @@
         width: 0;
         height: 0;
         opacity: 0;
-        pointer-events: none; /* ユーザーは押せない */
+        pointer-events: none;
       }
     </style>
   </head>
@@ -36,10 +36,32 @@
       </div>
     </div>
 
-    <!-- 🔔 Unityから呼ばれる透明ボタン -->
-    <button id="vibrateBtn" onclick="navigator.vibrate(500)"></button>
+    <!-- 透明振動ボタン -->
+    <button id="vibrateBtn"
+      onclick="if(navigator.vibrate){navigator.vibrate(500);}else{console.log('Vibrate not supported');}">
+    </button>
 
     <script>
+      // Unityから書き込むフラグ
+      let vibrateFlag = false;
+
+      // Unityが呼ぶ関数
+      function setVibrateFlag(value){
+        vibrateFlag = value ? true : false;
+      }
+
+      // フラグ監視ループ
+      function checkVibrate(){
+        if(vibrateFlag){
+          const btn = document.getElementById("vibrateBtn");
+          btn.click();
+          vibrateFlag = false; // 一度だけ振動
+        }
+      }
+
+      setInterval(checkVibrate, 100); // 0.1秒ごとに監視
+
+      // ===== Unity WebGL 初期化コード =====
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
@@ -99,14 +121,11 @@
           progressBarFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           loadingBar.style.display = "none";
-          fullscreenButton.onclick = () => {
-            unityInstance.SetFullscreen(1);
-          };
+          fullscreenButton.onclick = () => { unityInstance.SetFullscreen(1); }
         }).catch((message) => {
           alert(message);
         });
       };
-
       document.body.appendChild(script);
     </script>
   </body>
