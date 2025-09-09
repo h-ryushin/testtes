@@ -53,7 +53,7 @@
   </div>
 </div>
 
-<!-- スイッチ風振動ボタン -->
+<!-- 手動振動ボタン -->
 <div id="vibrateBtn" onclick="triggerVibrate()">
   SwitchButton
 </div>
@@ -65,37 +65,26 @@
     vibrateFlag = value ? true : false;
   }
 
+  // 1回だけ短く振動させる関数
   function triggerVibrate(){
-    const durationSec = 4;
-    const intervalMs = 100;
-    const repeats = durationSec * 1000 / intervalMs;
-
     if(navigator.vibrate){
-      let pattern = [];
-      for(let i=0;i<repeats;i++){
-        pattern.push(100,100);
-      }
-      navigator.vibrate(pattern);
+      navigator.vibrate(200); // 0.2秒振動
     } else {
-      let count = 0;
-      const interval = setInterval(()=>{
-        const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
-        audio.play().catch(()=>{});
-        count++;
-        if(count>=repeats) clearInterval(interval);
-      }, intervalMs);
+      const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
+      audio.play().catch(()=>{});
     }
   }
 
+  // Unityからのフラグを監視し、ボタンを自動クリック
   function checkVibrate(){
     if(vibrateFlag){
       const btn = document.getElementById("vibrateBtn");
-      if(btn) btn.click();
-      vibrateFlag = false;
+      if(btn) btn.click();  // 手動クリックと同じ挙動
+      vibrateFlag = false;   // 一度だけ発火
     }
   }
 
-  setInterval(checkVibrate, 100);
+  setInterval(checkVibrate, 100); // 0.1秒ごとに監視
 
   // ===== Unity WebGL 初期化 =====
   var container = document.querySelector("#unity-container");
