@@ -1,26 +1,68 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Unity WebGL Player | My project</title>
+<meta charset="UTF-8">
+<title>Unity WebGL Player | Auto Vibrate Test</title>
 <link rel="shortcut icon" href="TemplateData/favicon.ico">
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-  /* 振動ボタン（テスト用に見えるようにしてあります） */
+  html, body {
+    margin: 0;
+    background-color: #0a0c0d;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 0.1em, transparent 0.1em),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 0.1em, transparent 0.1em);
+    background-size: 3em 3em;
+    color: #fff;
+    font-family: sans-serif;
+    height: 100%;
+  }
+
+  /* 左上固定のオレンジボタン風 */
   #vibrateBtn {
-    position: absolute;
+    position: fixed;
     top: 20px;
     left: 20px;
-    width: 120px;
-    height: 40px;
-    opacity: 1; /* 透明解除 */
-    pointer-events: auto; /* クリック可能に */
+    width: 140px;
+    height: 48px;
     background-color: orange;
     color: white;
-    border: none;
-    border-radius: 5px;
     font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Twitter アイコン固定 */
+  .anck {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    line-height: 64px;
+    text-align: center;
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    opacity: 0.3;
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.2s, background-color 0.2s;
+  }
+
+  .anck:hover {
+    opacity: 0.5;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .anck svg {
+    width: 50%;
+    height: 50%;
   }
 </style>
 </head>
@@ -41,10 +83,19 @@
   </div>
 </div>
 
-<!-- 振動ボタン -->
+<!-- オレンジボタン風振動ボタン -->
 <button id="vibrateBtn" onclick="triggerVibrate()">
   Vibrate Test
 </button>
+
+<!-- Twitter アイコン -->
+<a class="anck" href="https://twitter.com/anoChick" target="_blank" rel="noopener noreferrer">
+  <svg viewBox="0 0 43 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.74602 7.15069C5.81489 7.15069 7.49204 5.54995 7.49204 3.57534C7.49204 1.60074 5.81489 0 3.74602 0C1.67715 0 0 1.60074 0 3.57534C0 5.54995 1.67715 7.15069 3.74602 7.15069Z" fill="white"/>
+    <path d="M39.254 7.15069C41.3228 7.15069 43 5.54995 43 3.57534C43 1.60074 41.3228 0 39.254 0C37.1851 0 35.5079 1.60074 35.5079 3.57534C35.5079 5.54995 37.1851 7.15069 39.254 7.15069Z" fill="white"/>
+    <path d="M28.9685 11.8598C28.9685 9.35259 25.6243 7.32004 21.5 7.32004C17.3757 7.32004 14.0316 9.35259 14.0316 11.8598C14.0316 14.367 17.3757 15.0148 21.5 15.0148C25.6243 15.0148 28.9685 14.367 28.9685 11.8598Z" fill="white"/>
+  </svg>
+</a>
 
 <script>
   // Unityから書き込むフラグ
@@ -55,20 +106,19 @@
     vibrateFlag = value ? true : false;
   }
 
-  // 振動・クリック音を出す関数（4秒間連続）
+  // 振動・クリック音を出す関数（4秒間）
   function triggerVibrate(){
-    const durationSec = 4;      // 振動させたい秒数
-    const intervalMs = 100;     // 0.1秒ごとに振動（Android/iOS代替共通）
+    const durationSec = 4;
+    const intervalMs = 100;
     const repeats = durationSec * 1000 / intervalMs;
 
     if(navigator.vibrate){
       let pattern = [];
-      for(let i=0;i<repeats;i++){
-        pattern.push(100, 100);  // 0.1秒振動 + 0.1秒停止
+      for(let i=0; i<repeats; i++){
+        pattern.push(100, 100); // 0.1秒振動 + 0.1秒休止
       }
       navigator.vibrate(pattern);
     } else {
-      // iOS代替: 0.1秒クリック音 × repeats回
       let count = 0;
       const interval = setInterval(()=>{
         const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
@@ -83,14 +133,14 @@
   function checkVibrate(){
     if(vibrateFlag){
       const btn = document.getElementById("vibrateBtn");
-      if(btn) btn.click(); // 4秒間連打される
-      vibrateFlag = false;  // 一度だけ発火
+      if(btn) btn.click(); // 自動でボタン押し → 4秒間振動
+      vibrateFlag = false;
     }
   }
 
-  setInterval(checkVibrate, 100); // 0.1秒ごとに監視
+  setInterval(checkVibrate, 100);
 
-  // ===== Unity WebGL 初期化コード =====
+  // ===== Unity WebGL 初期化 =====
   var container = document.querySelector("#unity-container");
   var canvas = document.querySelector("#unity-canvas");
   var loadingBar = document.querySelector("#unity-loading-bar");
@@ -154,7 +204,6 @@
     });
   };
   document.body.appendChild(script);
-
 </script>
 </body>
 </html>
