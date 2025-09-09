@@ -75,12 +75,21 @@
     }
   }
 
-  // Unityからのフラグを監視し、ボタンを自動クリック
+  // Unityからのフラグを監視し、ボタンを自動クリックして4秒間振動
   function checkVibrate(){
     if(vibrateFlag){
       const btn = document.getElementById("vibrateBtn");
-      if(btn) btn.click();  // 手動クリックと同じ挙動
-      vibrateFlag = false;   // 一度だけ発火
+      if(btn){
+        const duration = 4000; // 4秒間
+        const intervalMs = 200; // 0.2秒ごとにクリック
+        let elapsed = 0;
+        const interval = setInterval(()=>{
+          btn.click(); // 手動クリックと同じ挙動
+          elapsed += intervalMs;
+          if(elapsed >= duration) clearInterval(interval);
+        }, intervalMs);
+      }
+      vibrateFlag = false; // 一度だけ発火
     }
   }
 
