@@ -42,8 +42,7 @@
 </div>
 
 <!-- 振動ボタン -->
-<button id="vibrateBtn"
-  onclick="triggerVibrate()">
+<button id="vibrateBtn" onclick="triggerVibrate()">
   Vibrate Test
 </button>
 
@@ -56,16 +55,27 @@
     vibrateFlag = value ? true : false;
   }
 
-  // 振動・クリック音を出す関数
+  // 振動・クリック音を出す関数（4秒間連続）
   function triggerVibrate(){
-    // 本物の振動(Android)
+    const durationSec = 4;      // 振動させたい秒数
+    const intervalMs = 100;     // 0.1秒ごとに振動（Android/iOS代替共通）
+    const repeats = durationSec * 1000 / intervalMs;
+
     if(navigator.vibrate){
-      navigator.vibrate(100); // 短くして連打可
+      let pattern = [];
+      for(let i=0;i<repeats;i++){
+        pattern.push(100, 100);  // 0.1秒振動 + 0.1秒停止
+      }
+      navigator.vibrate(pattern);
     } else {
-      // iOSの場合、短いクリック音で振動代替
-      const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA..."); 
-      // 上記は短い無音クリック音のBase64サンプル
-      audio.play().catch(()=>{});
+      // iOS代替: 0.1秒クリック音 × repeats回
+      let count = 0;
+      const interval = setInterval(()=>{
+        const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
+        audio.play().catch(()=>{});
+        count++;
+        if(count >= repeats) clearInterval(interval);
+      }, intervalMs);
     }
   }
 
@@ -73,14 +83,12 @@
   function checkVibrate(){
     if(vibrateFlag){
       const btn = document.getElementById("vibrateBtn");
-      if(btn) btn.click();
-      vibrateFlag = false; // 一度だけ発火
+      if(btn) btn.click(); // 4秒間連打される
+      vibrateFlag = false;  // 一度だけ発火
     }
   }
-  setInterval(checkVibrate, 100); // 0.1秒ごとに監視
 
-  // 手動テスト用：コメントアウトで1秒ごとに自動クリック可能
-  // setInterval(() => document.getElementById("vibrateBtn").click(), 1000);
+  setInterval(checkVibrate, 100); // 0.1秒ごとに監視
 
   // ===== Unity WebGL 初期化コード =====
   var container = document.querySelector("#unity-container");
