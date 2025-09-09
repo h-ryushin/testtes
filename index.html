@@ -2,73 +2,43 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Unity WebGL Player | Auto Vibrate Test</title>
-<link rel="shortcut icon" href="TemplateData/favicon.ico">
+<title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
   html, body {
     margin: 0;
     background-color: #0a0c0d;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.05) 0.1em, transparent 0.1em),
-      linear-gradient(90deg, rgba(255,255,255,0.05) 0.1em, transparent 0.1em);
-    background-size: 3em 3em;
     color: #fff;
     font-family: sans-serif;
     height: 100%;
   }
 
-  /* 左上固定のオレンジボタン風 */
+  /* スイッチ風振動ボタン */
   #vibrateBtn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #222;
+    border-radius: 8px;
+    border: 2px solid #555;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
     position: fixed;
     top: 20px;
     left: 20px;
-    width: 140px;
-    height: 48px;
-    background-color: orange;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
   }
 
-  /* Twitter アイコン固定 */
-  .anck {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
-    line-height: 64px;
-    text-align: center;
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    opacity: 0.3;
-    background-color: rgba(255, 255, 255, 0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.2s, background-color 0.2s;
-  }
-
-  .anck:hover {
-    opacity: 0.5;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .anck svg {
-    width: 50%;
-    height: 50%;
+  #vibrateBtn:active {
+    background-color: #333;
+    transform: scale(0.97);
   }
 </style>
 </head>
 <body>
+
 <div id="unity-container" class="unity-desktop">
-  <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+  <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
   <div id="unity-loading-bar">
     <div id="unity-logo"></div>
     <div id="unity-progress-bar-empty">
@@ -83,30 +53,18 @@
   </div>
 </div>
 
-<!-- オレンジボタン風振動ボタン -->
-<button id="vibrateBtn" onclick="triggerVibrate()">
-  Vibrate Test
-</button>
-
-<!-- Twitter アイコン -->
-<a class="anck" href="https://twitter.com/anoChick" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 43 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3.74602 7.15069C5.81489 7.15069 7.49204 5.54995 7.49204 3.57534C7.49204 1.60074 5.81489 0 3.74602 0C1.67715 0 0 1.60074 0 3.57534C0 5.54995 1.67715 7.15069 3.74602 7.15069Z" fill="white"/>
-    <path d="M39.254 7.15069C41.3228 7.15069 43 5.54995 43 3.57534C43 1.60074 41.3228 0 39.254 0C37.1851 0 35.5079 1.60074 35.5079 3.57534C35.5079 5.54995 37.1851 7.15069 39.254 7.15069Z" fill="white"/>
-    <path d="M28.9685 11.8598C28.9685 9.35259 25.6243 7.32004 21.5 7.32004C17.3757 7.32004 14.0316 9.35259 14.0316 11.8598C14.0316 14.367 17.3757 15.0148 21.5 15.0148C25.6243 15.0148 28.9685 14.367 28.9685 11.8598Z" fill="white"/>
-  </svg>
-</a>
+<!-- スイッチ風振動ボタン -->
+<div id="vibrateBtn" onclick="triggerVibrate()">
+  SwitchButton
+</div>
 
 <script>
   // Unityから書き込むフラグ
   let vibrateFlag = false;
-
-  // Unityが呼ぶ関数
   function setVibrateFlag(value){
     vibrateFlag = value ? true : false;
   }
 
-  // 振動・クリック音を出す関数（4秒間）
   function triggerVibrate(){
     const durationSec = 4;
     const intervalMs = 100;
@@ -114,8 +72,8 @@
 
     if(navigator.vibrate){
       let pattern = [];
-      for(let i=0; i<repeats; i++){
-        pattern.push(100, 100); // 0.1秒振動 + 0.1秒休止
+      for(let i=0;i<repeats;i++){
+        pattern.push(100,100);
       }
       navigator.vibrate(pattern);
     } else {
@@ -124,16 +82,15 @@
         const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
         audio.play().catch(()=>{});
         count++;
-        if(count >= repeats) clearInterval(interval);
+        if(count>=repeats) clearInterval(interval);
       }, intervalMs);
     }
   }
 
-  // フラグ監視ループ
   function checkVibrate(){
     if(vibrateFlag){
       const btn = document.getElementById("vibrateBtn");
-      if(btn) btn.click(); // 自動でボタン押し → 4秒間振動
+      if(btn) btn.click();
       vibrateFlag = false;
     }
   }
@@ -148,62 +105,62 @@
   var fullscreenButton = document.querySelector("#unity-fullscreen-button");
   var warningBanner = document.querySelector("#unity-warning");
 
-  function unityShowBanner(msg, type) {
-    function updateBannerVisibility() {
-      warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+  function unityShowBanner(msg,type){
+    function updateBannerVisibility(){
+      warningBanner.style.display = warningBanner.children.length ? 'block':'none';
     }
     var div = document.createElement('div');
     div.innerHTML = msg;
     warningBanner.appendChild(div);
-    if (type == 'error') div.style = 'background: red; padding: 10px;';
-    else if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-    setTimeout(() => {
+    if(type=='error') div.style = 'background:red;padding:10px;';
+    else if(type=='warning') div.style = 'background:yellow;padding:10px;';
+    setTimeout(()=>{
       warningBanner.removeChild(div);
       updateBannerVisibility();
-    }, 5000);
+    },5000);
     updateBannerVisibility();
   }
 
-  var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/Build1.loader.js";
-  var config = {
-    dataUrl: buildUrl + "/Build1.data",
-    frameworkUrl: buildUrl + "/Build1.framework.js",
-    codeUrl: buildUrl + "/Build1.wasm",
-    streamingAssetsUrl: "StreamingAssets",
-    companyName: "DefaultCompany",
-    productName: "My project",
-    productVersion: "1.0",
-    showBanner: unityShowBanner,
+  var buildUrl="Build";
+  var loaderUrl=buildUrl+"/Build1.loader.js";
+  var config={
+    dataUrl: buildUrl+"/Build1.data",
+    frameworkUrl: buildUrl+"/Build1.framework.js",
+    codeUrl: buildUrl+"/Build1.wasm",
+    streamingAssetsUrl:"StreamingAssets",
+    companyName:"DefaultCompany",
+    productName:"My project",
+    productVersion:"1.0",
+    showBanner:unityShowBanner
   };
 
-  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+    var meta=document.createElement('meta');
+    meta.name='viewport';
+    meta.content='width=device-width,height=device-height,initial-scale=1.0,user-scalable=no,shrink-to-fit=yes';
     document.getElementsByTagName('head')[0].appendChild(meta);
-    container.className = "unity-mobile";
-    canvas.className = "unity-mobile";
-  } else {
-    canvas.style.width = "960px";
-    canvas.style.height = "600px";
+    container.className="unity-mobile";
+    canvas.className="unity-mobile";
+  }else{
+    canvas.style.width="960px";
+    canvas.style.height="600px";
   }
 
-  loadingBar.style.display = "block";
-
-  var script = document.createElement("script");
-  script.src = loaderUrl;
-  script.onload = () => {
-    createUnityInstance(canvas, config, (progress) => {
-      progressBarFull.style.width = 100 * progress + "%";
-    }).then((unityInstance) => {
-      loadingBar.style.display = "none";
-      fullscreenButton.onclick = () => { unityInstance.SetFullscreen(1); }
-    }).catch((message) => {
+  loadingBar.style.display="block";
+  var script=document.createElement("script");
+  script.src=loaderUrl;
+  script.onload=()=>{
+    createUnityInstance(canvas, config,(progress)=>{
+      progressBarFull.style.width=100*progress+"%";
+    }).then((unityInstance)=>{
+      loadingBar.style.display="none";
+      fullscreenButton.onclick=()=>{unityInstance.SetFullscreen(1);}
+    }).catch((message)=>{
       alert(message);
     });
   };
   document.body.appendChild(script);
+
 </script>
 </body>
 </html>
