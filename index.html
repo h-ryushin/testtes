@@ -6,7 +6,7 @@
     <title>Unity WebGL Player | My project</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <style>
+    <!-- <style>
       /* 透明の振動ボタン */
       #vibrateBtn {
         position: absolute;
@@ -17,7 +17,24 @@
         opacity: 0;
         pointer-events: none;
       }
-    </style>
+    </style> -->
+    <style>
+  /* テスト用にボタンを見えるようにする */
+  #vibrateBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 120px;
+    height: 40px;
+    opacity: 1; /* 透明解除 */
+    pointer-events: auto; /* クリック可能に */
+    background-color: orange;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+</style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
