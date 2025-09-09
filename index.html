@@ -5,170 +5,183 @@
 <title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-    html, body {
-        margin: 0;
-        background-color: #0a0c0d;
-        color: #fff;
-        font-family: sans-serif;
-        height: 100%;
-    }
+  /* 基本設定 */
+  html, body {
+    margin: 0;
+    background-color: #0a0c0d;
+    color: #fff;
+    font-family: sans-serif;
+    height: 100%;
+  }
 
-    /* スイッチ風振動ボタン */
-    #vibrateBtn {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #222;
-        border-radius: 8px;
-        border: 2px solid #555;
-        cursor: pointer;
-        user-select: none;
-        font-weight: bold;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        transition: background-color 0.2s, transform 0.1s;
-    }
+  /* 元のコードから移植した背景パターン */
+  body {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 0.1em, transparent 0.1em),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 0.1em, transparent 0.1em);
+    background-size: 3em 3em;
+  }
 
-    #vibrateBtn:active {
-        background-color: #333;
-        transform: scale(0.97);
-    }
+  /* 自動クリック用スイッチ */
+  #switch {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #222;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    position: fixed; /* 画面に固定 */
+    top: 20px;
+    left: 20px;
+  }
+
+  #switch input {
+    margin-right: 10px;
+  }
+
+  /* Twitter アイコン固定 */
+  .anck {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    line-height: 64px;
+    text-align: center;
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    opacity: 0.3;
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.2s, background-color 0.2s;
+  }
+
+  .anck:hover {
+    opacity: 0.5;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .anck svg {
+    width: 50%;
+    height: 50%;
+  }
 </style>
 </head>
 <body>
 
 <div id="unity-container" class="unity-desktop">
-    <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
-    <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-            <div id="unity-progress-bar-full"></div>
-        </div>
+  <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+  <div id="unity-loading-bar">
+    <div id="unity-logo"></div>
+    <div id="unity-progress-bar-empty">
+      <div id="unity-progress-bar-full"></div>
     </div>
-    <div id="unity-warning"></div>
-    <div id="unity-footer">
-        <div id="unity-webgl-logo"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">My project</div>
-    </div>
+  </div>
+  <div id="unity-warning"></div>
+  <div id="unity-footer">
+    <div id="unity-webgl-logo"></div>
+    <div id="unity-fullscreen-button"></div>
+    <div id="unity-build-title">My project</div>
+  </div>
 </div>
 
-<div id="vibrateBtn" onclick="triggerVibrate()">
+<div>
+  <label id="switch">
+    <input type="checkbox" checked />
     SwitchButton
+  </label>
 </div>
+
+<a class="anck" href="https://twitter.com/anoChick" target="_blank" rel="noopener noreferrer">
+  <svg viewBox="0 0 43 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.74602 7.15069C5.81489 7.15069 7.49204 5.54995 7.49204 3.57534C7.49204 1.60074 5.81489 0 3.74602 0C1.67715 0 0 1.60074 0 3.57534C0 5.54995 1.67715 7.15069 3.74602 7.15069Z" fill="white"/>
+    <path d="M39.254 7.15069C41.3228 7.15069 43 5.54995 43 3.57534C43 1.60074 41.3228 0 39.254 0C37.1851 0 35.5079 1.60074 35.5079 3.57534C35.5079 5.54995 37.1851 7.15069 39.254 7.15069Z" fill="white"/>
+    <path d="M28.9685 11.8598C28.9685 9.35259 25.6243 7.32004 21.5 7.32004C17.3757 7.32004 14.0316 9.35259 14.0316 11.8598C14.0316 14.367 17.3757 15.0148 21.5 15.0148C25.6243 15.0148 28.9685 14.367 28.9685 11.8598Z" fill="white"/>
+  </svg>
+</a>
 
 <script>
-    // Unityから書き込むフラグ
-    let vibrateFlag = false;
-    let autoVibrateInterval = null;
-    let autoVibrateEndTime = null;
+  // === Unity WebGL 初期化ロジック ===
+  var container = document.querySelector("#unity-container");
+  var canvas = document.querySelector("#unity-canvas");
+  var loadingBar = document.querySelector("#unity-loading-bar");
+  var progressBarFull = document.querySelector("#unity-progress-bar-full");
+  var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+  var warningBanner = document.querySelector("#unity-warning");
 
-    function setVibrateFlag(value){
-        vibrateFlag = value ? true : false;
-        if(vibrateFlag){
-            startAutoVibrate();
-        }
+  function unityShowBanner(msg, type){
+    function updateBannerVisibility(){
+      warningBanner.style.display = warningBanner.children.length ? 'block':'none';
     }
+    var div = document.createElement('div');
+    div.innerHTML = msg;
+    warningBanner.appendChild(div);
+    if(type=='error') div.style = 'background:red;padding:10px;';
+    else if(type=='warning') div.style = 'background:yellow;padding:10px;';
+    setTimeout(()=>{
+      warningBanner.removeChild(div);
+      updateBannerVisibility();
+    },5000);
+    updateBannerVisibility();
+  }
 
-    // 1回だけ短く振動させる関数
-    function triggerVibrate(){
-        if(navigator.vibrate){
-            navigator.vibrate(200); // 0.2秒振動
-        } else {
-            const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA...");
-            audio.play().catch(()=>{});
-        }
+  var buildUrl="Build";
+  var loaderUrl=buildUrl+"/Build1.loader.js";
+  var config={
+    dataUrl: buildUrl+"/Build1.data",
+    frameworkUrl: buildUrl+"/Build1.framework.js",
+    codeUrl: buildUrl+"/Build1.wasm",
+    streamingAssetsUrl:"StreamingAssets",
+    companyName:"DefaultCompany",
+    productName:"My project",
+    productVersion:"1.0",
+    showBanner:unityShowBanner
+  };
+
+  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+    var meta=document.createElement('meta');
+    meta.name='viewport';
+    meta.content='width=device-width,height=device-height,initial-scale=1.0,user-scalable=no,shrink-to-fit=yes';
+    document.getElementsByTagName('head')[0].appendChild(meta);
+    container.className="unity-mobile";
+    canvas.className="unity-mobile";
+  }else{
+    canvas.style.width="960px";
+    canvas.style.height="600px";
+  }
+
+  loadingBar.style.display="block";
+  var script=document.createElement("script");
+  script.src=loaderUrl;
+  script.onload=()=>{
+    createUnityInstance(canvas, config,(progress)=>{
+      progressBarFull.style.width=100*progress+"%";
+    }).then((unityInstance)=>{
+      loadingBar.style.display="none";
+      fullscreenButton.onclick=()=>{unityInstance.SetFullscreen(1);}
+    }).catch((message)=>{
+      alert(message);
+    });
+  };
+  document.body.appendChild(script);
+
+  // === 元のコードから移植した自動クリックロジック ===
+  // 1秒ごとにスイッチをクリックする
+  const f = () => {
+    const switchElement = document.getElementById("switch");
+    if (switchElement) {
+      switchElement.click();
+      
+      // ボタンがクリックされた時に振動させる
+      if(navigator.vibrate){
+        navigator.vibrate(200); // 0.2秒振動
+      }
     }
-
-    // 自動振動を開始する関数
-    function startAutoVibrate(){
-        // 既に自動振動が実行中の場合は何もしない
-        if(autoVibrateInterval) return;
-
-        // 4秒間振動を続ける
-        autoVibrateEndTime = Date.now() + 4000;
-
-        autoVibrateInterval = setInterval(() => {
-            if(Date.now() < autoVibrateEndTime){
-                triggerVibrate();
-            } else {
-                // 4秒経過したら停止
-                clearInterval(autoVibrateInterval);
-                autoVibrateInterval = null;
-                vibrateFlag = false; // フラグをリセット
-            }
-        }, 500); // 0.5秒ごとに振動をトリガー
-    }
-
-    // Unityからのフラグを監視し、ボタンを自動クリック
-    function checkVibrate(){
-        // この関数はもはや必要ありません。
-        // setVibrateFlag()関数が直接自動振動を開始します。
-    }
-
-    // Unity WebGL 初期化ロジックは変更なし
-    var container = document.querySelector("#unity-container");
-    var canvas = document.querySelector("#unity-canvas");
-    var loadingBar = document.querySelector("#unity-loading-bar");
-    var progressBarFull = document.querySelector("#unity-progress-bar-full");
-    var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-    var warningBanner = document.querySelector("#unity-warning");
-
-    function unityShowBanner(msg, type){
-        function updateBannerVisibility(){
-            warningBanner.style.display = warningBanner.children.length ? 'block':'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if(type=='error') div.style = 'background:red;padding:10px;';
-        else if(type=='warning') div.style = 'background:yellow;padding:10px;';
-        setTimeout(()=>{
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-        },5000);
-        updateBannerVisibility();
-    }
-
-    var buildUrl="Build";
-    var loaderUrl=buildUrl+"/Build1.loader.js";
-    var config={
-        dataUrl: buildUrl+"/Build1.data",
-        frameworkUrl: buildUrl+"/Build1.framework.js",
-        codeUrl: buildUrl+"/Build1.wasm",
-        streamingAssetsUrl:"StreamingAssets",
-        companyName:"DefaultCompany",
-        productName:"My project",
-        productVersion:"1.0",
-        showBanner:unityShowBanner
-    };
-
-    if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
-        var meta=document.createElement('meta');
-        meta.name='viewport';
-        meta.content='width=device-width,height=device-height,initial-scale=1.0,user-scalable=no,shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        container.className="unity-mobile";
-        canvas.className="unity-mobile";
-    }else{
-        canvas.style.width="960px";
-        canvas.style.height="600px";
-    }
-
-    loadingBar.style.display="block";
-    var script=document.createElement("script");
-    script.src=loaderUrl;
-    script.onload=()=>{
-        createUnityInstance(canvas, config,(progress)=>{
-            progressBarFull.style.width=100*progress+"%";
-        }).then((unityInstance)=>{
-            loadingBar.style.display="none";
-            fullscreenButton.onclick=()=>{unityInstance.SetFullscreen(1);}
-        }).catch((message)=>{
-            alert(message);
-        });
-    };
-    document.body.appendChild(script);
+  }
+  
+  setInterval(f, 1000);
 </script>
+
 </body>
 </html>
