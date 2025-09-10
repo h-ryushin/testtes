@@ -5,7 +5,6 @@
 <title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-  /* === スタイルは前回のものと同じです === */
   html, body {
     margin: 0;
     background-color: #0a0c0d;
@@ -17,7 +16,6 @@
     font-family: sans-serif;
     height: 100%;
   }
-
   .switch-container {
     display: flex;
     align-items: center;
@@ -25,20 +23,17 @@
     top: 20px;
     left: 20px;
   }
-
   .switch {
     position: relative;
     display: inline-block;
     width: 50px;
     height: 25px;
   }
-
   .switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
-
   .slider {
     position: absolute;
     cursor: pointer;
@@ -50,7 +45,6 @@
     transition: .4s;
     border-radius: 25px;
   }
-
   .slider:before {
     position: absolute;
     content: "";
@@ -62,22 +56,18 @@
     transition: .4s;
     border-radius: 50%;
   }
-
   input:checked + .slider {
     background-color: #2196F3;
   }
-
   input:checked + .slider:before {
     transform: translateX(25px);
   }
-
   .switch-text {
     margin-left: 10px;
     font-size: 16px;
     color: #fff;
     user-select: none;
   }
-
   #enableAutoVibrate {
     position: fixed;
     top: 20px;
@@ -93,7 +83,6 @@
 </style>
 </head>
 <body>
-
 <div id="unity-container" class="unity-desktop">
   <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
   <div id="unity-loading-bar">
@@ -109,7 +98,6 @@
     <div id="unity-build-title">My project</div>
   </div>
 </div>
-
 <div class="switch-container">
   <label class="switch">
     <input type="checkbox" id="vibrateSwitch" checked>
@@ -117,9 +105,7 @@
   </label>
   <span class="switch-text">SwitchButton</span>
 </div>
-
 <button id="enableAutoVibrate">自動バイブを有効にする</button>
-
 <script>
   // Unity WebGL の初期化ロジックはそのままです
   var container = document.querySelector("#unity-container");
@@ -128,7 +114,6 @@
   var progressBarFull = document.querySelector("#unity-progress-bar-full");
   var fullscreenButton = document.querySelector("#unity-fullscreen-button");
   var warningBanner = document.querySelector("#unity-warning");
-
   function unityShowBanner(msg, type){
     function updateBannerVisibility(){
       warningBanner.style.display = warningBanner.children.length ? 'block':'none';
@@ -144,7 +129,6 @@
     },5000);
     updateBannerVisibility();
   }
-
   var buildUrl="Build";
   var loaderUrl=buildUrl+"/Build1.loader.js";
   var config={
@@ -157,7 +141,6 @@
     productVersion:"1.0",
     showBanner:unityShowBanner
   };
-
   if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
     var meta=document.createElement('meta');
     meta.name='viewport';
@@ -169,7 +152,6 @@
     canvas.style.width="960px";
     canvas.style.height="600px";
   }
-
   loadingBar.style.display="block";
   var script=document.createElement("script");
   script.src=loaderUrl;
@@ -184,26 +166,26 @@
     });
   };
   document.body.appendChild(script);
-
   // === 修正されたJavaScript部分 ===
   const vibrateSwitch = document.getElementById("vibrateSwitch");
   const enableButton = document.getElementById("enableAutoVibrate");
   let autoVibrateEnabled = false;
-
+  // 振動パターンを定義: [振動時間, 休止時間, 振動時間, 休止時間, ...]
+  const fastVibratePattern = [50, 50, 50, 50, 50, 50]; // 50msの振動と50msの休止を3回繰り返す
   enableButton.addEventListener('click', () => {
     autoVibrateEnabled = true;
-    enableButton.disabled = true; // ボタンを無効化
+    enableButton.disabled = true;
     enableButton.textContent = "自動バイブ有効";
-    // 最初の振動を実行してユーザーに許可されたことを示す
-    if(navigator.vibrate) {
-      navigator.vibrate(200);
+    // 最初の振動を高速パターンで実行
+    if (navigator.vibrate) {
+      navigator.vibrate(fastVibratePattern);
     }
   });
-
   setInterval(() => {
     vibrateSwitch.checked = !vibrateSwitch.checked;
     if (autoVibrateEnabled && navigator.vibrate) {
-      navigator.vibrate(200);
+      // スイッチの切り替えと同時に高速バイブレーションパターンを実行
+      navigator.vibrate(fastVibratePattern);
     }
   }, 1000);
 </script>
