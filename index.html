@@ -5,7 +5,7 @@
 <title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-  /* === 統合されたスタイル === */
+  /* === スタイルは前回のものと同じです === */
   html, body {
     margin: 0;
     background-color: #0a0c0d;
@@ -77,32 +77,18 @@
     color: #fff;
     user-select: none;
   }
-  
-  .anck {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
-    line-height: 64px;
-    text-align: center;
+
+  #enableAutoVibrate {
     position: fixed;
-    right: 16px;
-    bottom: 16px;
-    opacity: 0.3;
-    background-color: rgba(255, 255, 255, 0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.2s, background-color 0.2s;
-  }
-
-  .anck:hover {
-    opacity: 0.5;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .anck svg {
-    width: 50%;
-    height: 50%;
+    top: 20px;
+    left: 150px;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
   }
 </style>
 </head>
@@ -132,16 +118,10 @@
   <span class="switch-text">SwitchButton</span>
 </div>
 
-<a class="anck" href="https://twitter.com/anoChick" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 43 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3.74602 7.15069C5.81489 7.15069 7.49204 5.54995 7.49204 3.57534C7.49204 1.60074 5.81489 0 3.74602 0C1.67715 0 0 1.60074 0 3.57534C0 5.54995 1.67715 7.15069 3.74602 7.15069Z" fill="white"/>
-    <path d="M39.254 7.15069C41.3228 7.15069 43 5.54995 43 3.57534C43 1.60074 41.3228 0 39.254 0C37.1851 0 35.5079 1.60074 35.5079 3.57534C35.5079 5.54995 37.1851 7.15069 39.254 7.15069Z" fill="white"/>
-    <path d="M28.9685 11.8598C28.9685 9.35259 25.6243 7.32004 21.5 7.32004C17.3757 7.32004 14.0316 9.35259 14.0316 11.8598C14.0316 14.367 17.3757 15.0148 21.5 15.0148C25.6243 15.0148 28.9685 14.367 28.9685 11.8598Z" fill="white"/>
-  </svg>
-</a>
+<button id="enableAutoVibrate">自動バイブを有効にする</button>
 
 <script>
-  // Unity WebGL 初期化ロジック
+  // Unity WebGL の初期化ロジックはそのままです
   var container = document.querySelector("#unity-container");
   var canvas = document.querySelector("#unity-canvas");
   var loadingBar = document.querySelector("#unity-loading-bar");
@@ -205,15 +185,27 @@
   };
   document.body.appendChild(script);
 
-  // === 修正部分 ===
+  // === 修正されたJavaScript部分 ===
   const vibrateSwitch = document.getElementById("vibrateSwitch");
-  vibrateSwitch.addEventListener('change', () => {
-    if (navigator.vibrate) {
+  const enableButton = document.getElementById("enableAutoVibrate");
+  let autoVibrateEnabled = false;
+
+  enableButton.addEventListener('click', () => {
+    autoVibrateEnabled = true;
+    enableButton.disabled = true; // ボタンを無効化
+    enableButton.textContent = "自動バイブ有効";
+    // 最初の振動を実行してユーザーに許可されたことを示す
+    if(navigator.vibrate) {
       navigator.vibrate(200);
     }
   });
 
-  // 自動でスイッチを切り替える部分のコードを削除しました。
+  setInterval(() => {
+    vibrateSwitch.checked = !vibrateSwitch.checked;
+    if (autoVibrateEnabled && navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+  }, 1000);
 </script>
 </body>
 </html>
