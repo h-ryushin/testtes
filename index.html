@@ -5,67 +5,79 @@
 <title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-  /* 基本設定 */
+  /* === 統合されたスタイル === */
   html, body {
     margin: 0;
     background-color: #0a0c0d;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 0.1em, transparent 0.1em),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 0.1em, transparent 0.1em);
+    background-size: 3em 3em;
     color: #fff;
     font-family: sans-serif;
     height: 100%;
   }
 
-  /* 元のコードから移植した背景パターン */
-  body {
-    background-image:
-      linear-gradient(rgba(255,255,255,0.05) 0.1em, transparent 0.1em),
-      linear-gradient(90deg, rgba(255,255,255,0.05) 0.1em, transparent 0.1em);
-    background-size: 3em 3em;
-  }
-
-  /* 自動クリック用スイッチ */
-  #switch {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #222;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    position: fixed; /* 画面に固定 */
+  .switch-container {
+    display: flex;
+    align-items: center;
+    position: fixed;
     top: 20px;
     left: 20px;
   }
 
-  #switch input {
-    margin-right: 10px;
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 25px;
   }
 
-  /* Twitter アイコン固定 */
-  .anck {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
-    line-height: 64px;
-    text-align: center;
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    opacity: 0.3;
-    background-color: rgba(255, 255, 255, 0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.2s, background-color 0.2s;
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
   }
 
-  .anck:hover {
-    opacity: 0.5;
-    background-color: rgba(255, 255, 255, 0.1);
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: .4s;
+    border-radius: 25px;
   }
 
-  .anck svg {
-    width: 50%;
-    height: 50%;
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 21px;
+    width: 21px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
   }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(25px);
+  }
+
+  .switch-text {
+    margin-left: 10px;
+    font-size: 16px;
+    color: #fff;
+    user-select: none;
+  }
+  
 </style>
 </head>
 <body>
@@ -86,23 +98,16 @@
   </div>
 </div>
 
-<div>
-  <label id="switch">
-    <input type="checkbox" checked />
-    SwitchButton
+<div class="switch-container">
+  <label class="switch">
+    <input type="checkbox" id="vibrateSwitch" checked>
+    <span class="slider"></span>
   </label>
+  <span class="switch-text">SwitchButton</span>
 </div>
 
-<a class="anck" href="https://twitter.com/anoChick" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 43 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3.74602 7.15069C5.81489 7.15069 7.49204 5.54995 7.49204 3.57534C7.49204 1.60074 5.81489 0 3.74602 0C1.67715 0 0 1.60074 0 3.57534C0 5.54995 1.67715 7.15069 3.74602 7.15069Z" fill="white"/>
-    <path d="M39.254 7.15069C41.3228 7.15069 43 5.54995 43 3.57534C43 1.60074 41.3228 0 39.254 0C37.1851 0 35.5079 1.60074 35.5079 3.57534C35.5079 5.54995 37.1851 7.15069 39.254 7.15069Z" fill="white"/>
-    <path d="M28.9685 11.8598C28.9685 9.35259 25.6243 7.32004 21.5 7.32004C17.3757 7.32004 14.0316 9.35259 14.0316 11.8598C14.0316 14.367 17.3757 15.0148 21.5 15.0148C25.6243 15.0148 28.9685 14.367 28.9685 11.8598Z" fill="white"/>
-  </svg>
-</a>
-
 <script>
-  // === Unity WebGL 初期化ロジック ===
+  // Unity WebGL 初期化ロジック
   var container = document.querySelector("#unity-container");
   var canvas = document.querySelector("#unity-canvas");
   var loadingBar = document.querySelector("#unity-loading-bar");
@@ -166,22 +171,19 @@
   };
   document.body.appendChild(script);
 
-  // === 元のコードから移植した自動クリックロジック ===
   // 1秒ごとにスイッチをクリックする
   const f = () => {
-    const switchElement = document.getElementById("switch");
+    const switchElement = document.getElementById("vibrateSwitch");
     if (switchElement) {
-      switchElement.click();
-      
-      // ボタンがクリックされた時に振動させる
-      if(navigator.vibrate){
-        navigator.vibrate(200); // 0.2秒振動
-      }
+        switchElement.checked = !switchElement.checked;
+        
+        if(navigator.vibrate){
+          navigator.vibrate(200);
+        }
     }
   }
-  
+
   setInterval(f, 1000);
 </script>
-
 </body>
 </html>
