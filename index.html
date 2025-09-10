@@ -5,7 +5,6 @@
 <title>Unity WebGL Player | Vibrate Switch</title>
 <link rel="stylesheet" href="TemplateData/style.css">
 <style>
-  /* === 統合されたスタイル === */
   html, body {
     margin: 0;
     background-color: #0a0c0d;
@@ -17,7 +16,6 @@
     font-family: sans-serif;
     height: 100%;
   }
-
   .switch-container {
     display: flex;
     align-items: center;
@@ -25,20 +23,17 @@
     top: 20px;
     left: 20px;
   }
-
   .switch {
     position: relative;
     display: inline-block;
     width: 50px;
     height: 25px;
   }
-
   .switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
-
   .slider {
     position: absolute;
     cursor: pointer;
@@ -50,7 +45,6 @@
     transition: .4s;
     border-radius: 25px;
   }
-
   .slider:before {
     position: absolute;
     content: "";
@@ -62,26 +56,33 @@
     transition: .4s;
     border-radius: 50%;
   }
-
   input:checked + .slider {
     background-color: #2196F3;
   }
-
   input:checked + .slider:before {
     transform: translateX(25px);
   }
-
   .switch-text {
     margin-left: 10px;
     font-size: 16px;
     color: #fff;
     user-select: none;
   }
-  
+  #enableAutoVibrate {
+    position: fixed;
+    top: 20px;
+    left: 150px; /* スイッチの右側に配置 */
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
-
 <div id="unity-container" class="unity-desktop">
   <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
   <div id="unity-loading-bar">
@@ -97,7 +98,6 @@
     <div id="unity-build-title">My project</div>
   </div>
 </div>
-
 <div class="switch-container">
   <label class="switch">
     <input type="checkbox" id="vibrateSwitch" checked>
@@ -105,7 +105,7 @@
   </label>
   <span class="switch-text">SwitchButton</span>
 </div>
-
+<button id="enableAutoVibrate">自動バイブを有効にする</button>
 <script>
   // Unity WebGL 初期化ロジック
   var container = document.querySelector("#unity-container");
@@ -114,7 +114,6 @@
   var progressBarFull = document.querySelector("#unity-progress-bar-full");
   var fullscreenButton = document.querySelector("#unity-fullscreen-button");
   var warningBanner = document.querySelector("#unity-warning");
-
   function unityShowBanner(msg, type){
     function updateBannerVisibility(){
       warningBanner.style.display = warningBanner.children.length ? 'block':'none';
@@ -130,7 +129,6 @@
     },5000);
     updateBannerVisibility();
   }
-
   var buildUrl="Build";
   var loaderUrl=buildUrl+"/Build1.loader.js";
   var config={
@@ -143,7 +141,6 @@
     productVersion:"1.0",
     showBanner:unityShowBanner
   };
-
   if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
     var meta=document.createElement('meta');
     meta.name='viewport';
@@ -155,7 +152,6 @@
     canvas.style.width="960px";
     canvas.style.height="600px";
   }
-
   loadingBar.style.display="block";
   var script=document.createElement("script");
   script.src=loaderUrl;
@@ -170,20 +166,28 @@
     });
   };
   document.body.appendChild(script);
-
-  // 1秒ごとにスイッチをクリックする
-  const f = () => {
-    const switchElement = document.getElementById("vibrateSwitch");
-    if (switchElement) {
-        switchElement.checked = !switchElement.checked;
-        
-        if(navigator.vibrate){
-          navigator.vibrate(200);
-        }
+  // スイッチ要素を取得
+  const vibrateSwitch = document.getElementById("vibrateSwitch");
+  const enableButton = document.getElementById("enableAutoVibrate");
+  let autoVibrateEnabled = false;
+  // 「自動バイブを有効にする」ボタンが押されたらフラグをtrueにする
+  enableButton.addEventListener('click', () => {
+    autoVibrateEnabled = true;
+    enableButton.disabled = true; // ボタンを無効化
+    enableButton.textContent = "自動バイブ有効";
+    // 最初の振動を実行してユーザーに許可されたことを示す
+    if(navigator.vibrate) {
+      navigator.vibrate(200);
     }
-  }
-
-  setInterval(f, 1000);
+  });
+  // 1秒ごとにスイッチの状態を自動で切り替える
+  setInterval(() => {
+    vibrateSwitch.checked = !vibrateSwitch.checked;
+    // 自動バイブが有効になっている場合のみ振動させる
+    if (autoVibrateEnabled && navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+  }, 1000);
 </script>
 </body>
 </html>
